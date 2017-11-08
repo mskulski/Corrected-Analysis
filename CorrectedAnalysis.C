@@ -233,7 +233,7 @@ void CorrectedAnalysis()
 		else Double_t error = 0;
 	
 		file2 << *min_element(run_list[j].begin(),run_list[j].end()) << "-" << *max_element(run_list[j].begin(),run_list[j].end()) << " " << run_name_list[j] << " " << run_concentration_averaged[j] << " " << error*run_concentration_averaged[j] << endl;
-		concfinal[j]=run_concentration_averaged[j];
+		final_concentration[j]=run_concentration_averaged[j];
 		final_error[j]=error*run_concentration_averaged[j];
 		run_number[j]=j;
 		run_error[j]=0;
@@ -241,70 +241,8 @@ void CorrectedAnalysis()
 	file2.close();
 	
 	TCanvas* runs = new TCanvas("Runs","",1200,900);
-	TGraphErrors* rungraph = new TGraphErrors(jmax,concfinal,runcount,errfinal,runerr1);
-	rungraph->SetTitle("Sample Concentrations");
-	rungraph->SetMarkerStyle(21);
-	rungraph->GetXaxis()->SetLabelSize(.025);
-	rungraph->GetYaxis()->SetTitle("Set Number");
-	rungraph->GetYaxis()->CenterTitle();
-	rungraph->GetYaxis()->SetTitleOffset(1.4);
-	rungraph->GetYaxis()->SetLabelSize(.025);
-	rungraph->SetMarkerSize(0.75);
-	Double_t last = rungraph->GetXaxis()->GetXmax();
-	rungraph->Draw("AP");
-	auto legend = new TLegend(0.1,0.8,0.4,0.9);
-	legend->AddEntry(rungraph,"Time-Averaged Concentrations","p");
-	legend->Draw();
-	 const char *text = "#bf{{}^{14}C /{}^{12}C Concentration}";
-	TLatex latex = TLatex(0.5,0.02,text);
-	latex.SetTextSize(0.035);
-	Double_t size = latex.GetXsize();
-	latex.SetTextAlign(11);
-	latex.DrawLatexNDC(0.5-size/2,0.02,text);
-	TText *t = new TText();
-	t->SetTextSize(0.02);
-	for(j=0;j<jmax;j++)
-	{
-	Double_t posx = concfinal[j];
-	Double_t height = runcount[j]+0.2;
-	t->DrawText(posx,height,run_name_list[j]);
-	}
-	runs->Update();
+	TGraphErrors* rungraph = new TGraphErrors(jmax,final_concentration,run_number,final_error,run_error);
 
-	TImage *img = TImage::Create();
-	img->FromPad(runs);
-	img->WriteImage("All Runs.png");
-	
-	TCanvas* runs2 = new TCanvas("Runs","",1200,900);
-	TGraph* eachrun = new TGraph(totalruns,&concstandard_concentration_corrected_index[0],&concstandard_concentration_corrected[0]);
-	runs2->SetGrid();
-	eachrun->SetMarkerStyle(21);
-	eachrun->GetXaxis()->SetNdivisions(run_files.size()/2);
-	eachrun->GetXaxis()->SetRange(run_files[0],run_files[0]+run_files.size()-1);
-	eachrun->GetXaxis()->SetLabelSize(.015);
-	eachrun->Draw();
-	
-	TImage *img2 = TImage::Create();
-	img2->FromPad(runs2);
-	img2->WriteImage("Each Run.png");
-	
-	TCanvas* transmission = new TCanvas("Average Transmission","",1200,900);
-	TGraph* transmission1 = new TGraph(nmax,&standard_concentration_count[0],&standard_concentration_averaged[0]);
-	transmission1->SetMarkerStyle(21);
-	transmission1->Draw();
-	
-	TImage *img3 = TImage::Create();
-	img3->FromPad(transmission);
-	img3->WriteImage("Average Transmission.png");
-	
-	TCanvas* transmission2 = new TCanvas("Run Transmission","",1200,900);
-	TGraph* transmission3 = new TGraph(totalstans,&standard_concentration_corrected_index[0],&standard_concentration_corrected[0]);
-	transmission3->SetMarkerStyle(21);
-	transmission3->Draw();
-	
-	TImage *img4 = TImage::Create();
-	img4->FromPad(transmission2);
-	img4->WriteImage("Run Transmission.png");
 }
 
 void GetCathode(int number)
